@@ -1,0 +1,7 @@
+{
+    "editor.fontSize": 14,
+    "python.analysis.extraPaths": [
+        ".venv/Lib"
+    ],
+    "python.analysis.indexing": true
+}
