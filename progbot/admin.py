@@ -4,8 +4,6 @@ from typing import Literal, Optional
 import discord
 from discord.ext import commands
 
-from prog_analyzer import ProgSummaryView
-
 logger = logging.getLogger(__name__)
 
 
@@ -17,8 +15,6 @@ class Admin(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         logger.info(f"Logged in as {self.bot.user.name}#{self.bot.user.discriminator}")
-
-        self.bot.add_view(ProgSummaryView())
 
     # https://about.abstractumbra.dev/discord.py/2022/01/29/sync-command-example.html
     @commands.command()

@@ -1,11 +1,10 @@
 import decimal
 import logging
 import re
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from turtle import title
-from typing import Any, Optional, TypedDict
+from typing import Any, Optional
 
 import discord
 from data import DEFAULT_ENCOUNTER_ID, Encounter, EncounterId, encounter_by_id
@@ -41,46 +40,6 @@ class EncounterContext:
     fight_duration_sum: decimal
     fights_by_id: dict[int, dict]
     prog_summary: list[ProgSummaryItem]
-
-
-class AddVodModal(discord.ui.Modal, title="Add VOD"):
-    url = discord.ui.TextInput(
-        label="Twitch VOD URL",
-        custom_id="vod_link",
-        max_length=100,
-        placeholder="https://twitch.tv/videos/...",
-    )
-
-    def __init__(self, ctx: EncounterContext) -> None:
-        super().__init__(timeout=None)
-        self.ctx = ctx
-
-    async def on_submit(self, interaction: discord.Interaction) -> None:
-        await interaction.response.send_message(
-            "This feature is not ready yet <a:nono:1219511294365794355>",
-            ephemeral=True,
-            delete_after=2,
-        )
-
-        logger.info(self.ctx)
-        # await interaction.response.send_message("link submitted", ephemeral=True, delete_after=2)
-
-
-class ProgSummaryView(discord.ui.View):
-    def __init__(self, ctx: EncounterContext = None) -> None:
-        super().__init__(timeout=None)
-
-        self.ctx = ctx
-
-    @discord.ui.button(
-        label="Add VOD (WIP)", style=discord.ButtonStyle.primary, custom_id="add_vod"
-    )
-    async def add_vod(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button,
-    ) -> None:
-        await interaction.response.send_modal(AddVodModal(self.ctx))
 
 
 class ProgAnalyzer(commands.Cog):
@@ -255,7 +214,7 @@ class ProgAnalyzer(commands.Cog):
         )
         await interaction.delete_original_response()
         await interaction.channel.send(
-            embed=self._construct_response_embed(ctx), view=ProgSummaryView(ctx)
+            embed=self._construct_response_embed(ctx),
         )
 
     @prog.error
