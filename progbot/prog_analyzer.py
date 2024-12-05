@@ -212,10 +212,15 @@ class ProgAnalyzer(commands.Cog):
         await interaction.edit_original_response(
             content="Done! Constructing message..."
         )
-        await interaction.delete_original_response()
-        await interaction.channel.send(
-            embed=self._construct_response_embed(ctx),
-        )
+        try:
+            await interaction.channel.send(
+                embed=self._construct_response_embed(ctx),
+            )
+            await interaction.delete_original_response()
+        except discord.errors.Forbidden:
+            await interaction.edit_original_response(
+                content="progbot doesn't have permissions to send messages here. Make sure to invite it to this channel."
+            )
 
     @prog.error
     async def on_command_error(self, interaction: discord.Interaction, error) -> None:
