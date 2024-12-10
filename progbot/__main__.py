@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 async def main() -> None:
     signal.signal(signal.SIGINT, lambda _, __: asyncio.create_task(os._exit(0)))
-    discord.utils.setup_logging(level=logging.DEBUG)
-    logging.getLogger("discord").setLevel(logging.INFO)
+    discord.utils.setup_logging(level=logging.INFO)
+    logging.getLogger("discord").setLevel(logging.WARNING)
 
     intents = discord.Intents.default()
     intents.message_content = True

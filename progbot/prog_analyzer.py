@@ -132,7 +132,7 @@ class ProgAnalyzer(commands.Cog):
         log_url: str,
         encounter_id: Optional[EncounterId] = None,
     ) -> None:
-        logger.debug(f"Received prog command for {log_url}")
+        logger.info(f"Received prog command for {log_url}")
 
         ctx = EncounterContext()
         ctx.encounter = encounter_by_id[encounter_id or DEFAULT_ENCOUNTER_ID]
