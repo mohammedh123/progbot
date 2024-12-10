@@ -112,6 +112,7 @@ encounter_by_id = {
                     (40301, 1, "Darklit Dragonsong"),
                     (40298, 1, "Crystallize Time"),
                     (40305, 1, "P4 Enrage"),
+                    (40263, 1, "Tree (Bad Ending)"),
                     (40306, 1, "Exalines 1"),
                     (40319, 1, "Towers 1"),
                     (40316, 1, "Polarizing Strikes 1"),
