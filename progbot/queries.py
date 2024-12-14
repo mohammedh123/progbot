@@ -25,9 +25,10 @@ events(
 """
 
 FIGHT_DATA_INNER_QUERY = """
-fights(encounterID: {encounterID}, killType: Wipes) {{
+fights(encounterID: {encounterID}) {{
     id
     startTime
     endTime
+    kill
 }}
 """

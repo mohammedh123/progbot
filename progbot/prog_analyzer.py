@@ -1,9 +1,11 @@
-import decimal
 import logging
 import re
+from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from decimal import Decimal
+from os import kill
 from typing import Any, Optional
 
 import discord
@@ -23,13 +25,23 @@ logging.getLogger("requests_oauthlib").setLevel(logging.WARNING)
 
 
 @dataclass
-class ProgSummaryItem:
+class AbstractSummaryItem(ABC):
     description: str
     fight_ids: list[int]
-    total_duration: decimal
+    total_duration: Decimal
 
-    def wipe_count(self) -> int:
+    def fight_count(self) -> int:
         return len(self.fight_ids)
+
+
+@dataclass
+class ProgSummaryItem(AbstractSummaryItem):
+    pass
+
+
+@dataclass
+class KillSummaryItem(AbstractSummaryItem):
+    pass
 
 
 class EncounterContext:
@@ -37,7 +49,7 @@ class EncounterContext:
     report_code: str
     log_url: str
     log_date: datetime
-    fight_duration_sum: decimal
+    fight_duration_sum: Decimal
     fights_by_id: dict[int, dict]
     prog_summary: list[ProgSummaryItem]
 
@@ -84,7 +96,7 @@ class ProgAnalyzer(commands.Cog):
         return REPORT_QUERY.format(
             reportCode=report_code,
             innerQuery=CAST_EVENTS_INNER_QUERY.format(
-                fightIDs=fight_ids,
+                fightIDs=list(fight_ids),
                 startTime=start_time,
                 endTime=end_time,
             ),
@@ -157,15 +169,20 @@ class ProgAnalyzer(commands.Cog):
         ctx.log_date = datetime.fromtimestamp(report["startTime"] / 1000)
         ctx.fight_duration_sum = sum(d["duration"] for d in report["fights"])
         ctx.fights_by_id = {d["id"]: d for d in report["fights"]}
+        prog_fight_ids = {
+            k for k in ctx.fights_by_id.keys() if not ctx.fights_by_id[k]["kill"]
+        }
+        kill_fight_ids = set(ctx.fights_by_id.keys()) - prog_fight_ids
 
         await interaction.edit_original_response(
             content="Done! Parsing prog data from fflogs..."
         )
 
         # Implicitly sorted by timestamp and fightID by the fflogs API
+        # Ignore fights that are kills
         casts = self._fetch_casts(
             ctx.report_code,
-            list(ctx.fights_by_id.keys()),
+            prog_fight_ids,
             report["fights"][0]["startTime"],
             report["fights"][-1]["endTime"],
         )
@@ -188,7 +205,7 @@ class ProgAnalyzer(commands.Cog):
             ] += 1
 
         fight_ids_by_prog = defaultdict(list[int])
-        for fight_id in ctx.fights_by_id:
+        for fight_id in prog_fight_ids:
             latest_cast_id = latest_cast_id_by_fight[fight_id]
             pi = ctx.encounter.get_prog_indicator_by_cast_and_count(
                 latest_cast_id,
@@ -208,6 +225,17 @@ class ProgAnalyzer(commands.Cog):
             for pi in ctx.encounter.prog_indicators
             if fight_ids_by_prog[pi]
         ]
+        if kill_fight_ids:
+            ctx.prog_summary.append(
+                KillSummaryItem(
+                    f"Kills: {len(kill_fight_ids)}",
+                    kill_fight_ids,
+                    sum(
+                        ctx.fights_by_id[fight_id]["duration"]
+                        for fight_id in kill_fight_ids
+                    ),
+                )
+            )
 
         await interaction.edit_original_response(
             content="Done! Constructing message..."
@@ -246,10 +274,18 @@ class ProgAnalyzer(commands.Cog):
                 timedelta(milliseconds=total_duration_ms)
             )
 
-            field_value = (
-                f"**{percentage_of_wipes:.1f}%** - {wipe_duration_str} in {item.wipe_count()} wipe"
-                + ("s" if item.wipe_count() > 1 else "")
-            )
+            match item:
+                case ProgSummaryItem():
+                    field_value = (
+                        f"**{percentage_of_wipes:.1f}%** - {wipe_duration_str} in {item.fight_count()} wipe"
+                        + ("s" if item.fight_count() > 1 else "")
+                    )
+                case KillSummaryItem():
+                    field_value = (
+                        f"**{percentage_of_wipes:.1f}%** - {wipe_duration_str} in {item.fight_count()} kill"
+                        + ("s" if item.fight_count() > 1 else "")
+                    )
+
             message_embed.add_field(
                 name=discord.utils.escape_markdown(item.description, as_needed=True),
                 value=field_value,
