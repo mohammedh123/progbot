@@ -135,7 +135,7 @@ encounter_by_id = {
                     (50179, 1, "Revolting Ruin III"),
                     (48370, 1, "Graven Image 1"),
                     (48370, 2, "Graven Image 2"),
-                    (47801, 1, "Tele-Trouncing"),
+                    (48370, 3, "Graven Image 3"),
                     (47804, 1, "Forsaken 1"),
                 )
             ],
