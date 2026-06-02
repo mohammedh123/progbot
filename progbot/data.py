@@ -7,6 +7,7 @@ from typing import FrozenSet, Iterable
 class EncounterId(enum.Enum):
     TOP = 1068
     FRU = 1079
+    DMU = 1085
 
 
 @dataclass(eq=True, frozen=True)
@@ -47,7 +48,7 @@ class Encounter:
     def get_prog_indicator_by_cast_and_count(
         self, cast_id: int, count: int
     ) -> ProgIndicator:
-        return self._prog_indicator_map[(cast_id, count)]
+        return self._prog_indicator_map.get((cast_id, count))
 
     def prog_indicating_cast_ids(self) -> set[int]:
         return set(chain.from_iterable(pi.cast_ids for pi in self.prog_indicators))
@@ -125,7 +126,21 @@ encounter_by_id = {
                 )
             ],
         ),
+        Encounter(
+            EncounterId.DMU,
+            "Dancing Mad (Ultimate)",
+            [
+                ProgIndicator(*args)
+                for args in (
+                    (50179, 1, "Revolting Ruin III"),
+                    (48370, 1, "Graven Image 1"),
+                    (48370, 2, "Graven Image 2"),
+                    (47801, 1, "Tele-Trouncing"),
+                    (47804, 1, "Forsaken 1"),
+                )
+            ],
+        ),
     )
 }
 
-DEFAULT_ENCOUNTER_ID = EncounterId.FRU
+DEFAULT_ENCOUNTER_ID = EncounterId.DMU

@@ -9,7 +9,13 @@ from os import kill
 from typing import Any, Optional
 
 import discord
-from data import DEFAULT_ENCOUNTER_ID, Encounter, EncounterId, encounter_by_id
+from data import (
+    DEFAULT_ENCOUNTER_ID,
+    Encounter,
+    EncounterId,
+    ProgIndicator,
+    encounter_by_id,
+)
 from discord import app_commands
 from discord.ext import commands
 from fflogsapi import FFLogsClient
@@ -197,20 +203,21 @@ class ProgAnalyzer(commands.Cog):
             )
         )
         cast_counts_by_fight_and_ability = defaultdict(int)
-        latest_cast_id_by_fight: dict[str, int] = {}
+        latest_pi_by_fight: dict[str, ProgIndicator] = {}
         for cast in casts:
-            latest_cast_id_by_fight[cast["fight"]] = cast["abilityGameID"]
-            cast_counts_by_fight_and_ability[
-                (cast["fight"], cast["abilityGameID"])
-            ] += 1
-
-        fight_ids_by_prog = defaultdict(list[int])
-        for fight_id in prog_fight_ids:
-            latest_cast_id = latest_cast_id_by_fight[fight_id]
+            fight_id = cast["fight"]
+            latest_cast_id = cast["abilityGameID"]
+            cast_counts_by_fight_and_ability[(fight_id, latest_cast_id)] += 1
             pi = ctx.encounter.get_prog_indicator_by_cast_and_count(
                 latest_cast_id,
                 cast_counts_by_fight_and_ability[(fight_id, latest_cast_id)],
             )
+            if pi:
+                latest_pi_by_fight[fight_id] = pi
+
+        fight_ids_by_prog = defaultdict(list[int])
+        for fight_id in prog_fight_ids:
+            pi = latest_pi_by_fight[fight_id]
             fight_ids_by_prog[pi].append(fight_id)
 
         ctx.prog_summary = [
