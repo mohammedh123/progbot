@@ -1,6 +1,11 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python:3-slim
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+    
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
 
