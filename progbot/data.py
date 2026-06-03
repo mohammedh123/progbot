@@ -136,7 +136,10 @@ encounter_by_id = {
                     (48370, 1, "Graven Image 1"),
                     (48370, 2, "Graven Image 2"),
                     (48370, 3, "Graven Image 3"),
-                    (47804, 1, "Forsaken 1"),
+                    (47803, 1, "P1 Enrage"),
+                    (47804, 1, "Forsaken"),
+                    (47839, 1, "Trine"),
+                    (47841, 1, "P2 Enrage"),
                 )
             ],
         ),
