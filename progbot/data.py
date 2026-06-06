@@ -140,6 +140,12 @@ encounter_by_id = {
                     (47804, 1, "Forsaken"),
                     (47839, 1, "Trine"),
                     (47841, 1, "P2 Enrage"),
+                    (49890, 1, "P3"),
+                    (47858, 1, "Bowels of Agony"),
+                    (47891, 1, "Vacuum Wave"),
+                    (47845, 1, "Big Kefka"),
+                    (47867, 1, "Black Hole"),
+                    (50718, 1, "P3 Enrage"),
                 )
             ],
         ),
