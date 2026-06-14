@@ -217,7 +217,11 @@ class ProgAnalyzer(commands.Cog):
 
         fight_ids_by_prog = defaultdict(list[int])
         for fight_id in prog_fight_ids:
-            pi = latest_pi_by_fight[fight_id]
+            pi = latest_pi_by_fight.get(fight_id)
+            if not pi:
+                # There must have been no casts, yet not considered a trash pull by the fflogs api; discard this pull
+                continue
+
             fight_ids_by_prog[pi].append(fight_id)
 
         ctx.prog_summary = [
